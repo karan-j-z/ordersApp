@@ -1,5 +1,6 @@
 package com.ziv.controller;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -40,6 +41,16 @@ public class OrderController {
 		return orderRepository.getOne(id);
 	}
 	
+	@GetMapping
+	@RequestMapping("{id}/{dateFrom}+{dateTo}")
+	public List<Integer> getOrdersByDate(@PathVariable Integer id, @PathVariable Date dateFrom, @PathVariable Date dateTo)
+	{
+//		System.out.println(dateTo);
+		List<Integer> orders = orderRepository.findOrdersByCustomerBetweenDates(id, dateFrom, dateTo);
+		
+		return orders;
+	}
+	
 	@PostMapping
 	public  Order create(@RequestBody final Order order)
 	{
@@ -51,6 +62,10 @@ public class OrderController {
 		productController.update(product_id, productToBeOrdered);
 		return orderRepository.saveAndFlush(order);
 	}
+	
+	
+	
+	
 	
 	@RequestMapping(value="{id}",method = RequestMethod.DELETE)
 	public void delete(@PathVariable Integer id)
