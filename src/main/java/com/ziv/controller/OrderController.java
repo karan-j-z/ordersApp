@@ -1,7 +1,9 @@
 package com.ziv.controller;
 
 import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import com.ziv.models.Order;
 import com.ziv.models.Product;
 import com.ziv.repositories.OrderRepository;
 import com.ziv.repositories.ProductRepository;
+
+import java.lang.reflect.Field;
 
 @RestController
 @RequestMapping("/api/orders/")
@@ -42,13 +46,36 @@ public class OrderController {
 	}
 	
 	@GetMapping
-	@RequestMapping("{id}/{dateFrom}+{dateTo}")
-	public List<Integer> getOrdersByDate(@PathVariable Integer id, @PathVariable Date dateFrom, @PathVariable Date dateTo)
+	@RequestMapping("{id}/{dateFrom}+{dateTo}+")
+	public List<Order> getOrdersByDate(@PathVariable Integer id, @PathVariable Date dateFrom, @PathVariable Date dateTo)
 	{
-//		System.out.println(dateTo);
-		List<Integer> orders = orderRepository.findOrdersByCustomerBetweenDates(id, dateFrom, dateTo);
+		List<Order> orders = (List<Order>) orderRepository.findOrdersByCustomerBetweenDates(id, dateFrom, dateTo);
 		
 		return orders;
+	}
+	
+	@GetMapping
+	@RequestMapping("{id}/{dateFrom}+{dateTo}")
+	public List<Integer> getOrderIdsByDate(@PathVariable Integer id, @PathVariable Date dateFrom, @PathVariable Date dateTo)
+	{
+		List<Integer> orderIds = orderRepository.findOrderIdsByCustomerBetweenDates(id, dateFrom, dateTo);
+		
+		return orderIds;
+	}
+	
+	@GetMapping
+	@RequestMapping("products/{dateFrom}+{dateTo}")
+	public Map<Integer,Long> getProductsByDate(@PathVariable Date dateFrom, @PathVariable Date dateTo)
+	{
+		Map<Integer,Long> productsCount = new HashMap<>();
+		
+		List<Object[]> result = orderRepository.findOrdersByProductsBetweenDates(dateFrom, dateTo);
+		for (Object[] obj: result) {
+			Integer product_id = (Integer) obj[0];
+			Long count = (Long) obj[1];
+			productsCount.put(product_id, count);
+		}
+		return productsCount;
 	}
 	
 	@PostMapping
